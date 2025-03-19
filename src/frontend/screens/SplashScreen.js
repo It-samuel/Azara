@@ -4,7 +4,7 @@ import { useFonts, PlayfairDisplay_400Regular } from '@expo-google-fonts/playfai
 
 const { width } = Dimensions.get('window');
 
-const SplashScreen = () => {
+const SplashScreen = ({navigation}) => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
   const progressAnim = useRef(new Animated.Value(0)).current;
@@ -38,7 +38,10 @@ const SplashScreen = () => {
         toValue: 1,
         duration: 2000,
         useNativeDriver: false, 
-      }).start();
+      }).start(() => {
+    
+    navigation.replace('Home');
+  });
     });
   }, [fontsLoaded]);
 
