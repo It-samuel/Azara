@@ -3,65 +3,56 @@ import { View, Text, Animated, StyleSheet, Dimensions } from 'react-native';
 import { useFonts, PlayfairDisplay_400Regular } from '@expo-google-fonts/playfair-display';
 
 const { width } = Dimensions.get('window');
+
 const SplashScreen = () => {
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(0.8)).current;
+  const progressAnim = useRef(new Animated.Value(0)).current;
+  const [showProgress, setShowProgress] = useState(false);
 
-    const fadeAnim = useRef(new Animated.Value(0)).current;
-    const scaleAnim = useRef(new Animated.Value(0.8)).current;
-    const progressAnim = useRef(new Animated.Value(0)).current;
-    const [showProgress, setShowProgress] = useState(false);
+  
+  const [fontsLoaded] = useFonts({
+    PlayfairDisplay_400Regular,
+  });
 
-    useEffect(() => {
-    console.log('UseEffect triggered, fontsLoaded:', fontsLoaded);
-    if (fontsLoaded) {
-      // Title animation
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 1200,
-          useNativeDriver: true,
-        }),
-        Animated.spring(scaleAnim, {
-          toValue: 1,
-          tension: 20,
-          friction: 7,
-          useNativeDriver: true,
-        }),
-      ]).start(() => {
-        // Show progress after title animation
-        setShowProgress(true);
-        
-        // Progress animation
-        Animated.timing(progressAnim, {
-          toValue: 1,
-          duration: 2000,
-          useNativeDriver: false,
-        }).start(() => {
-          // Navigate to main app after animation
-        //   setTimeout(() => {
-        //     onFinish && onFinish();
-        //   }, 500);
-        });
-      });
-    }
+  useEffect(() => {
+    if (!fontsLoaded) return;
+
+    // Run title animation
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 1200,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        tension: 20,
+        friction: 7,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      // Show and animate progress bar
+      setShowProgress(true);
+      Animated.timing(progressAnim, {
+        toValue: 1,
+        duration: 2000,
+        useNativeDriver: false, 
+      }).start();
+    });
   }, [fontsLoaded]);
 
+  // Prevent premature render
+  if (!fontsLoaded) return null;
 
-    let [fontsLoaded] = useFonts({
-        PlayfairDisplay_400Regular,
-    });
-
-     if (!fontsLoaded) {
-    return null;
-  }
-
+  // Interpolated width of progress bar
   const progressWidth = progressAnim.interpolate({
     inputRange: [0, 1],
     outputRange: [0, width * 0.8],
   });
 
-
   return (
-     <View style={styles.container}>
+    <View style={styles.container}>
       <Animated.View
         style={[
           styles.titleContainer,
@@ -92,18 +83,16 @@ const SplashScreen = () => {
   );
 };
 
-export default SplashScreen
-
+export default SplashScreen;
 
 const styles = StyleSheet.create({
-     container: {
+  container: {
     flex: 1,
-    justifyContent: 'center',
+    backgroundColor: '#800080',
     alignItems: 'center',
-    backgroundColor: '#800080', // Your original purple color
+    justifyContent: 'center',
   },
-
-    titleContainer: {
+  titleContainer: {
     alignItems: 'center',
     marginBottom: 60,
   },
@@ -114,7 +103,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 10,
   },
-
   subtitle: {
     fontFamily: 'PlayfairDisplay_400Regular',
     fontSize: 18,
@@ -133,7 +121,7 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     marginBottom: 20,
   },
-   progressFill: {
+  progressFill: {
     height: '100%',
     backgroundColor: '#00e676',
     borderRadius: 2,
@@ -143,4 +131,4 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#e3f2fd',
   },
-})
+});

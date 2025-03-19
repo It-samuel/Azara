@@ -1,14 +1,23 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 
-const homeScreen = () => {
+const HomeScreen = () => {
   return (
-    <View>
-      <Text>homeScreen</Text>
+    <View style={styles.container}>
+      
     </View>
   )
 }
 
-export default homeScreen
+export default HomeScreen
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+    container: {
+    width: '100%',
+    height: 880, // Full height of the screen
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#800080', // Your original purple color
+  },
+})
