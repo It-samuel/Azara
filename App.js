@@ -1,22 +1,26 @@
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
-import SplashScreen from './src/frontend/screens/SplashScreen'
+import SplashScreen from './src/frontend/screens/SplashScreen';
+
+
 
 export default function App() {
-  return (
-    <View>
+  return ( 
+    <SafeAreaView>
        <StatusBar style="auto" />
-      <SplashScreen />
+      <Text>Azara</Text>
+      
+      <SplashScreen/>
      
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    
     backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flex: 1,
   },
 });
