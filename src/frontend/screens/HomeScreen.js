@@ -1,7 +1,15 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useFonts, PlayfairDisplay_400Regular } from '@expo-google-fonts/playfair-display';
+import VoiceInputBar from '../components/VoiceInputBar';
+
 
 const HomeScreen = () => {
+
+    const [fontsLoaded] = useFonts({
+        PlayfairDisplay_400Regular,
+      });
+
   const getGreeting = () => {
     const currentHour = new Date().getHours();
 
@@ -13,6 +21,7 @@ const HomeScreen = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.greeting}>{getGreeting()}, welcome back!</Text>
+      <VoiceInputBar />
     </View>
   );
 };
@@ -22,13 +31,14 @@ export default HomeScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f4f4f4',
+    backgroundColor: '#fffaf6',
   },
   greeting: {
-    fontSize: 24,
+    fontFamily: 'PlayfairDisplay_400Regular',
+    fontSize: 20,
     fontWeight: '600',
     color: '#333',
+    marginHorizontal: 12,
+    marginTop: 24,
   },
 });
