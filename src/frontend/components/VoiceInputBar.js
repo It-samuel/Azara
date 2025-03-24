@@ -1,11 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, TouchableOpacity, StyleSheet, Animated } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Animated, Alert } from 'react-native';
 import { FontAwesome, Feather } from '@expo/vector-icons';
+import * as DocumentPicker from 'expo-document-picker';
 
 const VoiceInputBar = () => {
   const [listening, setListening] = useState(false);
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
+  // Animate mic when listening
   useEffect(() => {
     if (listening) {
       Animated.loop(
@@ -27,24 +29,38 @@ const VoiceInputBar = () => {
     }
   }, [listening]);
 
+  const pickFile = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: '*/*', // accept any file type
+        copyToCacheDirectory: true,
+        multiple: false,
+      });
+
+      if (result.type === 'success') {
+        console.log('Picked file:', result);
+        Alert.alert('File Selected', `Name: ${result.name}`);
+        // You can now send `result.uri` to your backend or process it further
+      }
+    } catch (error) {
+      console.error('File picking error:', error);
+    }
+  };
+
   return (
     <View style={styles.container}>
-      {/* Left: Plus Button */}
-      <TouchableOpacity style={styles.plusButton} onPress={() => {}}>
+      {/* Plus Button */}
+      <TouchableOpacity style={styles.plusButton} onPress={pickFile}>
         <Feather name="plus" size={28} color="#fff" />
       </TouchableOpacity>
 
-      {/* Center: Speaker Button */}
+      {/* Mic Button */}
       <TouchableOpacity
         onPress={() => setListening(!listening)}
         activeOpacity={0.8}
       >
         <Animated.View style={[styles.micButton, { transform: [{ scale: scaleAnim }] }]}>
-          <FontAwesome
-            name="microphone"
-            size={32}
-            color="#fff"
-          />
+          <FontAwesome name="microphone" size={32} color="#fff" />
         </Animated.View>
       </TouchableOpacity>
     </View>
