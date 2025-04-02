@@ -1,8 +1,8 @@
 import logging
 import os
 from pathlib import Path
-
 from aiohttp import web
+from aiohttp_cors import setup as cors_setup, ResourceOptions
 from azure.core.credentials import AzureKeyCredential
 from azure.identity import AzureDeveloperCliCredential, DefaultAzureCredential
 from dotenv import load_dotenv
@@ -29,17 +29,29 @@ async def create_app():
         else:
             logger.info("Using DefaultAzureCredential")
             credential = DefaultAzureCredential()
+    
     llm_credential = AzureKeyCredential(llm_key) if llm_key else credential
     search_credential = AzureKeyCredential(search_key) if search_key else credential
     
     app = web.Application()
+    
+    # Setup CORS for React Native
+    cors = cors_setup(app, defaults={
+        "*": ResourceOptions(
+            allow_credentials=True,
+            expose_headers="*",
+            allow_headers="*",
+            allow_methods="*"
+        )
+    })
 
     rtmt = RTMiddleTier(
         credentials=llm_credential,
         endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
         deployment=os.environ["AZURE_OPENAI_REALTIME_DEPLOYMENT"],
         voice_choice=os.environ.get("AZURE_OPENAI_REALTIME_VOICE_CHOICE") or "alloy"
-        )
+    )
+    
     rtmt.system_message = """
         You are a helpful assistant. Only answer questions based on information you searched in the knowledge base, accessible with the 'search' tool. 
         The user is listening to answers with audio, so it's *super* important that answers are as short as possible, a single sentence if at all possible. 
@@ -60,17 +72,35 @@ async def create_app():
         embedding_field=os.environ.get("AZURE_SEARCH_EMBEDDING_FIELD") or "text_vector",
         title_field=os.environ.get("AZURE_SEARCH_TITLE_FIELD") or "title",
         use_vector_query=(os.getenv("AZURE_SEARCH_USE_VECTOR_QUERY", "true") == "true")
-        )
+    )
 
+    # Health check endpoint for React Native
+    async def health_check(request):
+        return web.json_response({"status": "healthy", "service": "voice-rag-backend"})
+    
+    # Configuration endpoint for React Native
+    async def get_config(request):
+        return web.json_response({
+            "websocket_url": f"ws://localhost:8765/realtime",  # Update with your domain
+            "voice_choice": rtmt.voice_choice,
+            "supported_voices": ["alloy", "echo", "fable", "onyx", "nova", "shimmer"]
+        })
+
+    # Add routes
+    app.router.add_get('/health', health_check)
+    app.router.add_get('/config', get_config)
+    
+    # WebSocket endpoint for realtime communication
     rtmt.attach_to_app(app, "/realtime")
-
-    current_directory = Path(__file__).parent
-    app.add_routes([web.get('/', lambda _: web.FileResponse(current_directory / 'static/index.html'))])
-    app.router.add_static('/', path=current_directory / 'static', name='static')
+    
+    # Add CORS to all routes
+    for route in list(app.router.routes()):
+        cors.add(route)
     
     return app
 
 if __name__ == "__main__":
-    host = "localhost"
-    port = 8765
+    host = "0.0.0.0"  # Changed to allow external connections
+    port = int(os.environ.get("PORT", 8765))
+    logger.info(f"Starting server on {host}:{port}")
     web.run_app(create_app(), host=host, port=port)
