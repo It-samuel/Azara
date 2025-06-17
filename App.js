@@ -1,11 +1,13 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
+import SplashScreen from './src/frontend/screens/SplashScreen'
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Good To Be Back!!!!!!!!!!!!!!!</Text>
-      <StatusBar style="auto" />
+    <View>
+       <StatusBar style="auto" />
+      <SplashScreen />
+     
     </View>
   );
 }
